@@ -1,16 +1,16 @@
+# import sys
+# sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 import argparse
 import copy
 import os
 import os.path as osp
 import time
 import warnings
-
 import mmcv
 import torch
 from mmcv import Config, DictAction
 from mmcv.runner import get_dist_info, init_dist
 from mmcv.utils import get_git_hash
-
 from mmdet import __version__
 from mmdet.apis import set_random_seed, train_detector
 from mmdet.datasets import build_dataset
@@ -20,8 +20,8 @@ from mmdet.utils import collect_env, get_root_logger
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
-    parser.add_argument('config', help='train config file path')
-    parser.add_argument('--work-dir', help='the dir to save logs and models')
+    parser.add_argument('--config', default='../work_dir/fcos_center-normbbox-centeronreg-giou_r50_caffe_fpn_gn-head_4x4_1x_coco.py', help='train config file path')
+    parser.add_argument('--work-dir',default='../work_dir', help='the dir to save logs and models')
     parser.add_argument(
         '--resume-from', help='the checkpoint file to resume from')
     parser.add_argument(
@@ -57,11 +57,7 @@ def parse_args():
         nargs='+',
         action=DictAction,
         help='override some settings in the used config, the key-value pair '
-        'in xxx=yyy format will be merged into config file. If the value to '
-        'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
-        'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
-        'Note that the quotation marks are necessary and that no white space '
-        'is allowed.')
+        'in xxx=yyy format will be merged into config file.')
     parser.add_argument(
         '--launcher',
         choices=['none', 'pytorch', 'slurm', 'mpi'],
@@ -155,8 +151,7 @@ def main():
     meta['seed'] = args.seed
     meta['exp_name'] = osp.basename(args.config)
 
-    model = build_detector(
-        cfg.model, train_cfg=cfg.train_cfg, test_cfg=cfg.test_cfg)
+    model = build_detector(cfg.model, train_cfg=cfg.train_cfg, test_cfg=cfg.test_cfg)
 
     datasets = [build_dataset(cfg.data.train)]
     if len(cfg.workflow) == 2:

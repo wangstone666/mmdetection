@@ -65,12 +65,7 @@ class SingleStageDetector(BaseDetector):
         outs = self.bbox_head(x)
         return outs
 
-    def forward_train(self,
-                      img,
-                      img_metas,
-                      gt_bboxes,
-                      gt_labels,
-                      gt_bboxes_ignore=None):
+    def forward_train(self,img,img_metas,gt_bboxes,gt_labels,gt_bboxes_ignore=None):
         """
         Args:
             img (Tensor): Input images of shape (N, C, H, W).
