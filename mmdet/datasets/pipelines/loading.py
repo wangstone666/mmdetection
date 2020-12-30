@@ -6,7 +6,7 @@ import pycocotools.mask as maskUtils
 
 from mmdet.core import BitmapMasks, PolygonMasks
 from ..builder import PIPELINES
-
+from cfg import  getkey
 
 @PIPELINES.register_module()
 class LoadImageFromFile(object):
@@ -36,6 +36,8 @@ class LoadImageFromFile(object):
         self.color_type = color_type
         self.file_client_args = file_client_args.copy()
         self.file_client = None
+        self.use_radar = getkey('use_radar')
+
 
     def __call__(self, results):
         """Call functions to load image and get image meta information.
@@ -60,12 +62,22 @@ class LoadImageFromFile(object):
         img = mmcv.imfrombytes(img_bytes, flag=self.color_type)
         if self.to_float32:
             img = img.astype(np.float32)
-
+        '''
+           如果使用radar通道，那么加载图片的通道数为6 
+        '''
+        if self.use_radar:
+            radar_name=filename.replace('train2017','radar')
+            radar_bytes = self.file_client.get(radar_name)
+            radar_img = mmcv.imfrombytes(radar_bytes, flag=self.color_type)
+            img_plus=np.concatenate((img,radar_img),axis=2)
+        else:
+            img_plus=img
+            
         results['filename'] = filename
         results['ori_filename'] = results['img_info']['filename']
-        results['img'] = img
-        results['img_shape'] = img.shape
-        results['ori_shape'] = img.shape
+        results['img'] = img_plus
+        results['img_shape'] = img_plus.shape
+        results['ori_shape'] = img_plus.shape
         results['img_fields'] = ['img']
         return results
 

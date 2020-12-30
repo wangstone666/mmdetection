@@ -541,7 +541,7 @@ class Pad(object):
         repr_str += f'pad_val={self.pad_val})'
         return repr_str
 
-
+from cfg import getkey
 @PIPELINES.register_module()
 class Normalize(object):
     """Normalize the image.
@@ -559,6 +559,7 @@ class Normalize(object):
         self.mean = np.array(mean, dtype=np.float32)
         self.std = np.array(std, dtype=np.float32)
         self.to_rgb = to_rgb
+        self.use_radar=getkey('use_radar')
 
     def __call__(self, results):
         """Call function to normalize images.
@@ -571,7 +572,15 @@ class Normalize(object):
                 result dict.
         """
         for key in results.get('img_fields', ['img']):
-            results[key] = mmcv.imnormalize(results[key], self.mean, self.std,
+            # print('***'*30)
+            # print('key:',key)
+            # print('use_radar:',self.use_radar)
+            # print('***' * 30)
+            if self.use_radar:
+                results[key] = mmcv.imnormalize(results[key], self.mean, self.std,
+                                                self.to_rgb)
+            else:
+                results[key] = mmcv.imnormalize(results[key], self.mean, self.std,
                                             self.to_rgb)
         results['img_norm_cfg'] = dict(
             mean=self.mean, std=self.std, to_rgb=self.to_rgb)
