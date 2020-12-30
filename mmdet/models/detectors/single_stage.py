@@ -14,13 +14,7 @@ class SingleStageDetector(BaseDetector):
     output features of the backbone+neck.
     """
 
-    def __init__(self,
-                 backbone,
-                 neck=None,
-                 bbox_head=None,
-                 train_cfg=None,
-                 test_cfg=None,
-                 pretrained=None):
+    def __init__(self,backbone,neck=None,bbox_head=None,train_cfg=None,test_cfg=None,pretrained=None):
         super(SingleStageDetector, self).__init__()
         self.backbone = build_backbone(backbone)
         if neck is not None:
@@ -51,6 +45,11 @@ class SingleStageDetector(BaseDetector):
 
     def extract_feat(self, img):
         """Directly extract features from the backbone+neck."""
+        # print("***"*20)
+        # print('SingleStageDetector:',img.shape)
+        # print(img)
+        # print("***" * 20)
+
         x = self.backbone(img)
         if self.with_neck:
             x = self.neck(x)
@@ -84,6 +83,8 @@ class SingleStageDetector(BaseDetector):
         Returns:
             dict[str, Tensor]: A dictionary of loss components.
         """
+
+
         super(SingleStageDetector, self).forward_train(img, img_metas)
         x = self.extract_feat(img)
         losses = self.bbox_head.forward_train(x, img_metas, gt_bboxes,

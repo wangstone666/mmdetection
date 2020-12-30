@@ -66,6 +66,9 @@ class CocoDataset(CustomDataset):
         data_infos = []
         for i in self.img_ids:
             info = self.coco.load_imgs([i])[0]
+
+
+
             info['filename'] = info['file_name']
             data_infos.append(info)
         return data_infos
@@ -231,8 +234,6 @@ class CocoDataset(CustomDataset):
                     data['image_id'] = img_id
                     data['bbox'] = self.xyxy2xywh(bboxes[i])
                     data['score'] = float(bboxes[i][4])
-                    print("data['image_id']:", img_id)
-                    print("data['category_id']:",label)
                     data['category_id'] = self.cat_ids[label]
                     json_results.append(data)
         return json_results

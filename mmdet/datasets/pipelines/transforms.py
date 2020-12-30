@@ -62,14 +62,7 @@ class Resize(object):
             Defaults to False.
     """
 
-    def __init__(self,
-                 img_scale=None,
-                 multiscale_mode='range',
-                 ratio_range=None,
-                 keep_ratio=True,
-                 bbox_clip_border=True,
-                 backend='cv2',
-                 override=False):
+    def __init__(self,img_scale=None,multiscale_mode='range',ratio_range=None, keep_ratio=True,bbox_clip_border=True,backend='cv2',override=False):
         if img_scale is None:
             self.img_scale = None
         else:
@@ -203,11 +196,15 @@ class Resize(object):
         """Resize images with ``results['scale']``."""
         for key in results.get('img_fields', ['img']):
             if self.keep_ratio:
+
                 img, scale_factor = mmcv.imrescale(
                     results[key],
                     results['scale'],
                     return_scale=True,
                     backend=self.backend)
+                # print('***' * 20)
+                # print('after resize:  img.shape:', img.shape)
+                # print('***' * 20)
                 # the w_scale and h_scale has minor difference
                 # a real fix should be done in the mmcv.imrescale in the future
                 new_h, new_w = img.shape[:2]
@@ -229,6 +226,7 @@ class Resize(object):
             results['pad_shape'] = img.shape
             results['scale_factor'] = scale_factor
             results['keep_ratio'] = self.keep_ratio
+
 
     def _resize_bboxes(self, results):
         """Resize bounding boxes with ``results['scale_factor']``."""
@@ -572,18 +570,13 @@ class Normalize(object):
                 result dict.
         """
         for key in results.get('img_fields', ['img']):
-            # print('***'*30)
-            # print('key:',key)
-            # print('use_radar:',self.use_radar)
-            # print('***' * 30)
+
             if self.use_radar:
-                results[key] = mmcv.imnormalize(results[key], self.mean, self.std,
-                                                self.to_rgb)
+                results[key] = mmcv.imnormalize(results[key][:,:,:3], self.mean, self.std,self.to_rgb)
             else:
-                results[key] = mmcv.imnormalize(results[key], self.mean, self.std,
-                                            self.to_rgb)
-        results['img_norm_cfg'] = dict(
-            mean=self.mean, std=self.std, to_rgb=self.to_rgb)
+                results[key] = mmcv.imnormalize(results[key], self.mean, self.std,self.to_rgb)
+
+        results['img_norm_cfg'] = dict(mean=self.mean, std=self.std, to_rgb=self.to_rgb)
         return results
 
     def __repr__(self):

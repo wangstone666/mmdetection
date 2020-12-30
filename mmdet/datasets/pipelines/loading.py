@@ -28,10 +28,7 @@ class LoadImageFromFile(object):
             Defaults to ``dict(backend='disk')``.
     """
 
-    def __init__(self,
-                 to_float32=False,
-                 color_type='color',
-                 file_client_args=dict(backend='disk')):
+    def __init__(self,to_float32=False,color_type='color',file_client_args=dict(backend='disk')):
         self.to_float32 = to_float32
         self.color_type = color_type
         self.file_client_args = file_client_args.copy()
@@ -72,7 +69,9 @@ class LoadImageFromFile(object):
             img_plus=np.concatenate((img,radar_img),axis=2)
         else:
             img_plus=img
-            
+        # print('***'*20)
+        # print('img_plus.shape:',img_plus.shape)
+        # print('***' * 20)
         results['filename'] = filename
         results['ori_filename'] = results['img_info']['filename']
         results['img'] = img_plus
@@ -142,10 +141,7 @@ class LoadMultiChannelImageFromFiles(object):
             Defaults to ``dict(backend='disk')``.
     """
 
-    def __init__(self,
-                 to_float32=False,
-                 color_type='unchanged',
-                 file_client_args=dict(backend='disk')):
+    def __init__(self,to_float32=False,color_type='unchanged',file_client_args=dict(backend='disk')):
         self.to_float32 = to_float32
         self.color_type = color_type
         self.file_client_args = file_client_args.copy()
