@@ -35,29 +35,31 @@ class Compose(object):
         Returns:
            dict: Transformed data.
         """
-        print("***" * 20)
-        print('before compose:\n', data)
-        print("***" * 20)
+        # print("***" * 20)
+        # print('before compose:\n', data)
+        # print("***" * 20)
         k=1
         for t in self.transforms:
             data = t(data)
-            if k<7:
-                print("***" * 20)
-                print(t)
-                print('{} th composing {}:\n'.format(k,data['img'].shape))
-                print("***" * 20)
-            else:
-                print("***" * 20)
-                print(t)
-                print('{} th composing {}:\n'.format(k,(data['img'].data)[0].shape))
-                print("***" * 20)
-            k=k+1
+            # if k<7:
+            #     print("***" * 20)
+            #     print(t)
+            #     print('{} th composing {}:\n'.format(k,data['img'].shape))
+            #     print(type(data['img']))
+            #     print("***" * 20)
+            # else:
+            #     print("***" * 20)
+            #     print(t)
+            #     print('{} th composing {}:\n'.format(k,(data['img'].data)[0].shape))
+            #     print((data['img'].data)[0])
+            #     print("***" * 20)
+            # k=k+1
 
             if data is None:
                 return None
-        print("***" * 20)
-        print('after compose:\n', (data['img'].data)[0].shape)
-        print("***" * 20)
+        # print("***" * 20)
+        # print('after compose:\n', (data['img'].data)[0].shape)
+        # print("***" * 20)
         return data
 
     def __repr__(self):

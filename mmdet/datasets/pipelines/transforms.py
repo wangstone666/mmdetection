@@ -572,7 +572,7 @@ class Normalize(object):
         for key in results.get('img_fields', ['img']):
 
             if self.use_radar:
-                results[key] = mmcv.imnormalize(results[key][:,:,:3], self.mean, self.std,self.to_rgb)
+                results[key] [:,:,:3]= mmcv.imnormalize(results[key][:,:,:3], self.mean, self.std,self.to_rgb)
             else:
                 results[key] = mmcv.imnormalize(results[key], self.mean, self.std,self.to_rgb)
 

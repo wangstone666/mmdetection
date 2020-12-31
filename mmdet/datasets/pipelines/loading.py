@@ -28,7 +28,7 @@ class LoadImageFromFile(object):
             Defaults to ``dict(backend='disk')``.
     """
 
-    def __init__(self,to_float32=False,color_type='color',file_client_args=dict(backend='disk')):
+    def __init__(self,to_float32=True,color_type='color',file_client_args=dict(backend='disk')):
         self.to_float32 = to_float32
         self.color_type = color_type
         self.file_client_args = file_client_args.copy()
@@ -57,18 +57,24 @@ class LoadImageFromFile(object):
 
         img_bytes = self.file_client.get(filename)
         img = mmcv.imfrombytes(img_bytes, flag=self.color_type)
-        if self.to_float32:
-            img = img.astype(np.float32)
+
         '''
            如果使用radar通道，那么加载图片的通道数为6 
         '''
+
         if self.use_radar:
             radar_name=filename.replace('train2017','radar')
             radar_bytes = self.file_client.get(radar_name)
             radar_img = mmcv.imfrombytes(radar_bytes, flag=self.color_type)
+            if self.to_float32:
+                img = img.astype(np.float32)
+                radar_img = radar_img.astype(np.float32)
             img_plus=np.concatenate((img,radar_img),axis=2)
         else:
+            if self.to_float32:
+                img = img.astype(np.float32)
             img_plus=img
+
         # print('***'*20)
         # print('img_plus.shape:',img_plus.shape)
         # print('***' * 20)

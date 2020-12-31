@@ -1,14 +1,12 @@
 import torch.nn as nn
 import torch.utils.checkpoint as cp
-from mmcv.cnn import (build_conv_layer, build_norm_layer, build_plugin_layer,
-                      constant_init, kaiming_init)
+from mmcv.cnn import (build_conv_layer, build_norm_layer, build_plugin_layer, constant_init, kaiming_init)
 from mmcv.runner import load_checkpoint
 from torch.nn.modules.batchnorm import _BatchNorm
-
 from mmdet.utils import get_root_logger
 from ..builder import BACKBONES
 from ..utils import ResLayer
-
+from cfg import getkey
 
 class BasicBlock(nn.Module):
     expansion = 1
@@ -449,6 +447,7 @@ class ResNet(nn.Module):
 
         self.feat_dim = self.block.expansion * base_channels * 2**(
             len(self.stage_blocks) - 1)
+        self.use_radar = getkey('use_radar')
 
     def make_stage_plugins(self, plugins, stage_idx):
         """Make plugins for ResNet ``stage_idx`` th stage.
@@ -624,9 +623,15 @@ class ResNet(nn.Module):
         if self.deep_stem:
             x = self.stem(x)
         else:
-            x = self.conv1(x)
-            x = self.norm1(x)
-            x = self.relu(x)
+            if self.use_radar:
+                x=x[:,:3,:]
+                x = self.conv1(x)
+                x = self.norm1(x)
+                x = self.relu(x)
+            else:
+                x = self.conv1(x)
+                x = self.norm1(x)
+                x = self.relu(x)
         x = self.maxpool(x)
         outs = []
         for i, layer_name in enumerate(self.res_layers):

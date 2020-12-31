@@ -84,6 +84,7 @@ class BaseDetector(nn.Module, metaclass=ABCMeta):
 
 
         batch_input_shape = tuple(imgs[0].size()[-2:])
+        #print('batch_input_shape:',batch_input_shape)  # batch_input_shape: (768, 1344)
         for img_meta in img_metas:
             img_meta['batch_input_shape'] = batch_input_shape
 

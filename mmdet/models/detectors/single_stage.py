@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+from cfg import getkey
 from mmdet.core import bbox2result
 from ..builder import DETECTORS, build_backbone, build_head, build_neck
 from .base import BaseDetector
@@ -25,6 +25,7 @@ class SingleStageDetector(BaseDetector):
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
         self.init_weights(pretrained=pretrained)
+        self.use_radar = getkey('use_radar')
 
     def init_weights(self, pretrained=None):
         """Initialize the weights in detector.
@@ -47,8 +48,18 @@ class SingleStageDetector(BaseDetector):
         """Directly extract features from the backbone+neck."""
         # print("***"*20)
         # print('SingleStageDetector:',img.shape)
-        # print(img)
         # print("***" * 20)
+        # if self.use_radar:
+        #     radar_img =img[:,:,3:6]
+        #     img=img[:,:,:3]
+        #
+        #     x = self.backbone(img)
+        #     if self.with_neck:
+        #         x = self.neck(x)
+        # else:
+        #     x = self.backbone(img)
+        #     if self.with_neck:
+        #         x = self.neck(x)
 
         x = self.backbone(img)
         if self.with_neck:
