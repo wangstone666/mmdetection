@@ -36,8 +36,8 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=4,
-    workers_per_gpu=4,
+    samples_per_gpu=1,
+    workers_per_gpu=1,
     train=dict(
         type='CocoDataset',
         ann_file=
@@ -118,8 +118,8 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.3333333333333333,
-    step=[8, 11])
-total_epochs = 12
+    step=[16, 21])
+total_epochs = 24
 checkpoint_config = dict(interval=1)
 log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 dist_params = dict(backend='nccl')

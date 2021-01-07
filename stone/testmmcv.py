@@ -6,10 +6,15 @@ img2='../data/coco/radar/n008-2018-08-01-15-16-36-0400__CAM_FRONT__1533151603512
 img3=mmcv.imread(img1)
 img4=mmcv.imread(img2)
 
+import torch
+s=torch.Tensor([[1,2,3],[2,4,6]])
+a=torch.Tensor([[2,2,2],[2,2,2]])
+b=torch.cat((s,a),dim=0)
+print(b)
 
 
-a=DataContainer(img3)
-print(a.data.shape)
+# a=DataContainer(img3)
+# print(a.data.shape)
 
 # print(img3.shape,img4.shape)
 # print(type(img3))
@@ -24,10 +29,10 @@ print(a.data.shape)
 # c=np.concatenate((a,b),axis=0)
 # print(c.shape)
 # print(c)
-import torch
-d= torch.Tensor([[1,1,2,3],[2,2,2,2]])
-
-print(d.shape)
+# import torch
+# d= torch.Tensor([[1,1,2,3],[2,2,2,2]])
+#
+# print(d.shape)
 
 
 # LoadImageFromFile(to_float32=False, color_type='color', file_client_args={'backend': 'disk'})

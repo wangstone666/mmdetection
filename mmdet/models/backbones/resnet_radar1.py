@@ -7,7 +7,7 @@ from mmdet.utils import get_root_logger
 from ..builder import BACKBONES
 from ..utils import ResLayer
 from cfg import getkey
-import torch
+
 class BasicBlock(nn.Module):
     expansion = 1
 
@@ -515,26 +515,23 @@ class ResNet(nn.Module):
 
         self.radar_conv1 =nn.Sequential(
             nn.Conv2d(3, 64,kernel_size=3, stride=2,padding=1,bias=False),
-            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+            nn.MaxPool2d(kernel_size=3,stride=2,padding=1),
             nn.ReLU(inplace=True)
             )
-        self.radar_conv2 = nn.Sequential(
-            nn.Conv2d(128,64,kernel_size=1,padding=1,stride=1,bias=False),
-            #nn.ReLU(inplace=True)
-        )
-        # self.radar_conv2=nn.Sequential(
-        #     nn.Conv2d(64, 256,kernel_size=3, stride=1,padding=1,bias=False),
-        #     nn.MaxPool2d(kernel_size=3,stride=1,padding=1),
-        #     nn.ReLU(inplace=True)
-        #     )
-        #
-        # self.radar_conv3 =nn.Sequential(
-        #     nn.Conv2d(256, 512,kernel_size=3, stride=1,padding=1,bias=False),
-        #     nn.MaxPool2d(kernel_size=3,stride=2,padding=1),
-        #     nn.ReLU(inplace=True)
-        #     )
 
-        # self.radar_conv4 =nn.Sequential(
+        self.radar_conv2=nn.Sequential(
+            nn.Conv2d(64, 256,kernel_size=3, stride=1,padding=1,bias=False),
+            nn.MaxPool2d(kernel_size=3,stride=1,padding=1),
+            nn.ReLU(inplace=True)
+            )
+
+        self.radar_conv3 =nn.Sequential(
+            nn.Conv2d(256, 512,kernel_size=3, stride=1,padding=1,bias=False),
+            nn.MaxPool2d(kernel_size=3,stride=2,padding=1),
+            nn.ReLU(inplace=True)
+            )
+
+        # self.radar_conv3 =nn.Sequential(
         #     nn.Conv2d(3, 512,kernel_size=3, stride=1,padding=1),
         #     nn.MaxPool2d(kernel_size=3,stride=2,padding=1),
         #     nn.ReLU(inplace=True)
@@ -549,10 +546,10 @@ class ResNet(nn.Module):
         for m in self.radar_conv2:
             if isinstance(m, nn.Conv2d):
                 kaiming_init(m)
-        #
-        # for m in self.radar_conv3:
-        #     if isinstance(m, nn.Conv2d):
-        #         kaiming_init(m)
+
+        for m in self.radar_conv3:
+            if isinstance(m, nn.Conv2d):
+                kaiming_init(m)
     ###################################################################################
 
 
@@ -620,6 +617,7 @@ class ResNet(nn.Module):
                 radar_x=self.radar_conv1(radar_x)
                 #print('radar_x.shape:',radar_x.shape)
                 x=x[:,:3,:,:]    # x第一个批次为batch size维度   torch.Size([4, 3, 928, 1600])
+
                 x = self.conv1(x)
                 x = self.norm1(x)
                 x = self.relu(x)
@@ -632,15 +630,7 @@ class ResNet(nn.Module):
         #############################
         #print('x.shape:', x.shape)
         if self.use_radar:
-
-            # print('*****'*20)
-            # print(x)
-            # print('*****' * 20)
-            # print(radar_x)
-            # print('*****' * 20)
-            x=torch.cat((x,radar_x),dim=1)
-            #print(x)
-            x=self.radar_conv2(x)
+            x=x+radar_x
         ###############################
 
         outs = []
@@ -648,6 +638,14 @@ class ResNet(nn.Module):
             res_layer = getattr(self, layer_name)
             x = res_layer(x)
             #####################################
+            if self.use_radar and i==0:
+                radar_x=self.radar_conv2(radar_x)
+                x=x+radar_x
+            if self.use_radar and i==1:
+
+                radar_x=self.radar_conv3(radar_x)
+
+                x=x+radar_x
             #print('layer_name:',layer_name,' x.shape:', x.shape)
             ########################################
             if i in self.out_indices:
