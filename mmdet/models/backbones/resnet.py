@@ -260,6 +260,28 @@ class Bottleneck(nn.Module):
 
         return out
 
+##########################################################################
+def min_max_pool2d(x):
+    max_x = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))(x)
+    min_x = min_pool2d(x)
+    return torch.cat([max_x, min_x], dim=1)  # concatenate on channel
+
+def min_pool2d(x, padding=1):
+    max_val = torch.max(x) + 1  # we gonna replace all zeros with that value
+    # replace all 0s with very high numbers
+    is_zero = torch.where(torch.eq(x, 0.), max_val, x)
+    x = is_zero + x
+
+    # execute pooling with 0s being replaced by a high number
+    min_x = -nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2), padding=padding)(-x)
+
+    # depending on the value we either substract the zero replacement or not
+    is_result_zero = torch.where(torch.eq(min_x, max_val), max_val, min_x)
+    min_x = min_x - is_result_zero
+
+    return min_x  # concatenate on channel
+
+##########################################################################
 
 @BACKBONES.register_module()
 class ResNet(nn.Module):
@@ -510,17 +532,19 @@ class ResNet(nn.Module):
 
 
 
-    ####################################################################################
+###################################################################################
     def make_radar_layer(self):
 
         self.radar_conv1 =nn.Sequential(
-            nn.Conv2d(3, 64,kernel_size=3, stride=2,padding=1,bias=False),
-            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(3, 64,kernel_size=3, stride=2,bias=False),
+            #nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+            #min_max_pool2d()
             nn.ReLU(inplace=True)
             )
         self.radar_conv2 = nn.Sequential(
-            nn.Conv2d(128,64,kernel_size=1,padding=1,stride=1,bias=False),
-            #nn.ReLU(inplace=True)
+            nn.Conv2d(64,256,kernel_size=1,stride=1,bias=False),
+            #nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+            nn.ReLU(inplace=True)
         )
         # self.radar_conv2=nn.Sequential(
         #     nn.Conv2d(64, 256,kernel_size=3, stride=1,padding=1,bias=False),
@@ -549,7 +573,7 @@ class ResNet(nn.Module):
         for m in self.radar_conv2:
             if isinstance(m, nn.Conv2d):
                 kaiming_init(m)
-        #
+
         # for m in self.radar_conv3:
         #     if isinstance(m, nn.Conv2d):
         #         kaiming_init(m)
@@ -617,7 +641,9 @@ class ResNet(nn.Module):
 
             if self.use_radar:
                 radar_x =x[:,3:,:,:]
-                radar_x=self.radar_conv1(radar_x)
+                radar_x = min_pool2d(radar_x)
+                radar_x= self.radar_conv1 (radar_x)
+
                 #print('radar_x.shape:',radar_x.shape)
                 x=x[:,:3,:,:]    # x第一个批次为batch size维度   torch.Size([4, 3, 928, 1600])
                 x = self.conv1(x)
@@ -638,15 +664,22 @@ class ResNet(nn.Module):
             # print('*****' * 20)
             # print(radar_x)
             # print('*****' * 20)
-            x=torch.cat((x,radar_x),dim=1)
-            #print(x)
-            x=self.radar_conv2(x)
+            # concat
+            # x=torch.cat((x,radar_x),dim=1)
+            # x=self.radar_conv2(x)
+            x=x+radar_x
         ###############################
 
         outs = []
         for i, layer_name in enumerate(self.res_layers):
             res_layer = getattr(self, layer_name)
             x = res_layer(x)
+            if self.use_radar and i==0:
+                #radar_x=min_pool2d(radar_x,padding=1)
+                radar_x =self.radar_conv2(radar_x)
+                # print('radar.shape',radar_x.shape)
+                # print(x.shape)
+                x=0.2*radar_x+0.8*x
             #####################################
             #print('layer_name:',layer_name,' x.shape:', x.shape)
             ########################################
