@@ -114,11 +114,11 @@ optimizer = dict(
     paramwise_cfg=dict(bias_lr_mult=2.0, bias_decay_mult=0.0))
 optimizer_config = dict(grad_clip=None)
 lr_config = dict(
-    policy='CosineAnnealing',
+    policy='step',
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.3333333333333333,
-    min_lr_ratio=1e-05)
+    step=[16, 21])
 total_epochs = 24
 checkpoint_config = dict(interval=1)
 log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])

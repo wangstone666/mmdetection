@@ -552,17 +552,17 @@ class ResNet(nn.Module):
         #     nn.ReLU(inplace=True)
         #     )
         #
-        # self.radar_conv3 =nn.Sequential(
-        #     nn.Conv2d(256, 512,kernel_size=3, stride=1,padding=1,bias=False),
-        #     nn.MaxPool2d(kernel_size=3,stride=2,padding=1),
-        #     nn.ReLU(inplace=True)
-        #     )
+        self.radar_conv3 =nn.Sequential(
+            nn.Conv2d(256, 512,kernel_size=3, padding=1,stride=1,bias=False),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+            )
 
-        # self.radar_conv4 =nn.Sequential(
-        #     nn.Conv2d(3, 512,kernel_size=3, stride=1,padding=1),
-        #     nn.MaxPool2d(kernel_size=3,stride=2,padding=1),
-        #     nn.ReLU(inplace=True)
-        #     )
+        self.radar_conv4 =nn.Sequential(
+            nn.Conv2d(512,1024,kernel_size=3, stride=1,padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3,stride=2,padding=1)
+            )
 
 
     def init_radar_weight(self):
@@ -574,9 +574,12 @@ class ResNet(nn.Module):
             if isinstance(m, nn.Conv2d):
                 kaiming_init(m)
 
-        # for m in self.radar_conv3:
-        #     if isinstance(m, nn.Conv2d):
-        #         kaiming_init(m)
+        for m in self.radar_conv3:
+            if isinstance(m, nn.Conv2d):
+                kaiming_init(m)
+        for m in self.radar_conv4:
+            if isinstance(m, nn.Conv2d):
+                kaiming_init(m)
     ###################################################################################
 
 
@@ -659,15 +662,10 @@ class ResNet(nn.Module):
         #print('x.shape:', x.shape)
         if self.use_radar:
 
-            # print('*****'*20)
-            # print(x)
-            # print('*****' * 20)
-            # print(radar_x)
-            # print('*****' * 20)
             # concat
             # x=torch.cat((x,radar_x),dim=1)
             # x=self.radar_conv2(x)
-            x=x+radar_x
+            x=0.9*x+0.1*radar_x
         ###############################
 
         outs = []
@@ -679,6 +677,14 @@ class ResNet(nn.Module):
                 radar_x =self.radar_conv2(radar_x)
                 # print('radar.shape',radar_x.shape)
                 # print(x.shape)
+                x=0.1*radar_x+0.9*x
+            if self.use_radar and i==1:
+                radar_x=self.radar_conv3(radar_x)
+                # print(radar_x.shape)
+                # print(x.shape)
+                x=0.2*radar_x+0.8*x
+            if self.use_radar and i==2:
+                radar_x=self.radar_conv4(radar_x)
                 x=0.2*radar_x+0.8*x
             #####################################
             #print('layer_name:',layer_name,' x.shape:', x.shape)
