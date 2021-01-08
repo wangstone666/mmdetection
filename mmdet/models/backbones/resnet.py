@@ -563,6 +563,11 @@ class ResNet(nn.Module):
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3,stride=2,padding=1)
             )
+        self.radar_conv5 =nn.Sequential(
+            nn.Conv2d(1024,2048,kernel_size=3, stride=1,padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3,stride=2,padding=1)
+            )
 
 
     def init_radar_weight(self):
@@ -578,6 +583,9 @@ class ResNet(nn.Module):
             if isinstance(m, nn.Conv2d):
                 kaiming_init(m)
         for m in self.radar_conv4:
+            if isinstance(m, nn.Conv2d):
+                kaiming_init(m)
+        for m in self.radar_conv5:
             if isinstance(m, nn.Conv2d):
                 kaiming_init(m)
     ###################################################################################
@@ -682,10 +690,14 @@ class ResNet(nn.Module):
                 radar_x=self.radar_conv3(radar_x)
                 # print(radar_x.shape)
                 # print(x.shape)
-                x=0.2*radar_x+0.8*x
+                x=0.1*radar_x+0.9*x
             if self.use_radar and i==2:
                 radar_x=self.radar_conv4(radar_x)
-                x=0.2*radar_x+0.8*x
+                x=0.1*radar_x+0.9*x
+
+            if self.use_radar and i==3:
+                radar_x=self.radar_conv5(radar_x)
+                x=0.1*radar_x+0.9*x
             #####################################
             #print('layer_name:',layer_name,' x.shape:', x.shape)
             ########################################
