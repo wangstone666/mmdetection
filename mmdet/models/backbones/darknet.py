@@ -1,12 +1,10 @@
 # Copyright (c) 2019 Western Digital Corporation or its affiliates.
 
 import logging
-
 import torch.nn as nn
 from mmcv.cnn import ConvModule, constant_init, kaiming_init
 from mmcv.runner import load_checkpoint
 from torch.nn.modules.batchnorm import _BatchNorm
-
 from ..builder import BACKBONES
 
 

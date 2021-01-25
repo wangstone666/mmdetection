@@ -63,6 +63,7 @@ class LoadImageFromFile(object):
         '''
 
         if self.use_radar:
+
             radar_name=filename.replace('train2017','radar')
             radar_bytes = self.file_client.get(radar_name)
             radar_img = mmcv.imfrombytes(radar_bytes, flag=self.color_type)

@@ -46,21 +46,6 @@ class SingleStageDetector(BaseDetector):
 
     def extract_feat(self, img):
         """Directly extract features from the backbone+neck."""
-        # print("***"*20)
-        # print('SingleStageDetector:',img.shape)
-        # print("***" * 20)
-        # if self.use_radar:
-        #     radar_img =img[:,:,3:6]
-        #     img=img[:,:,:3]
-        #
-        #     x = self.backbone(img)
-        #     if self.with_neck:
-        #         x = self.neck(x)
-        # else:
-        #     x = self.backbone(img)
-        #     if self.with_neck:
-        #         x = self.neck(x)
-
         x = self.backbone(img)
         if self.with_neck:
             x = self.neck(x)
@@ -116,6 +101,7 @@ class SingleStageDetector(BaseDetector):
                 The outer list corresponds to each image. The inner list
                 corresponds to each class.
         """
+
         x = self.extract_feat(img)
         outs = self.bbox_head(x)
         bbox_list = self.bbox_head.get_bboxes(

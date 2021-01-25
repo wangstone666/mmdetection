@@ -164,7 +164,7 @@ def show_result_pyplot(model,
                        score_thr=0.3,
                        fig_size=(15, 10),
                        title='result',
-                       block=True):
+                       block=True,show=False):
     """Visualize the detection results on the image.
 
     Args:
@@ -180,8 +180,10 @@ def show_result_pyplot(model,
     if hasattr(model, 'module'):
         model = model.module
     img = model.show_result(img, result, score_thr=score_thr, show=False)
-    plt.figure(figsize=fig_size)
-    plt.imshow(mmcv.bgr2rgb(img))
-    plt.title(title)
-    plt.tight_layout()
-    plt.show(block=block)
+    if show:
+        plt.figure(figsize=fig_size)
+        plt.imshow(mmcv.bgr2rgb(img))
+        plt.title(title)
+        plt.tight_layout()
+        plt.show(block=block)
+    return img

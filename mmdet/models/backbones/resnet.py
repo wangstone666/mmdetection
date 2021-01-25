@@ -271,16 +271,12 @@ def min_pool2d(x, padding=1):
     # replace all 0s with very high numbers
     is_zero = torch.where(torch.eq(x, 0.), max_val, x)
     x = is_zero + x
-
     # execute pooling with 0s being replaced by a high number
     min_x = -nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2), padding=padding)(-x)
-
     # depending on the value we either substract the zero replacement or not
     is_result_zero = torch.where(torch.eq(min_x, max_val), max_val, min_x)
     min_x = min_x - is_result_zero
-
     return min_x  # concatenate on channel
-
 ##########################################################################
 
 @BACKBONES.register_module()
@@ -537,21 +533,16 @@ class ResNet(nn.Module):
 
         self.radar_conv1 =nn.Sequential(
             nn.Conv2d(3, 64,kernel_size=3, stride=2,bias=False),
-            #nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
             #min_max_pool2d()
-            nn.ReLU(inplace=True)
+            nn.ReLU(inplace=True),
+            #nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
             )
         self.radar_conv2 = nn.Sequential(
             nn.Conv2d(64,256,kernel_size=1,stride=1,bias=False),
             #nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
             nn.ReLU(inplace=True)
         )
-        # self.radar_conv2=nn.Sequential(
-        #     nn.Conv2d(64, 256,kernel_size=3, stride=1,padding=1,bias=False),
-        #     nn.MaxPool2d(kernel_size=3,stride=1,padding=1),
-        #     nn.ReLU(inplace=True)
-        #     )
-        #
+
         self.radar_conv3 =nn.Sequential(
             nn.Conv2d(256, 512,kernel_size=3, padding=1,stride=1,bias=False),
             nn.ReLU(inplace=True),
@@ -559,12 +550,12 @@ class ResNet(nn.Module):
             )
 
         self.radar_conv4 =nn.Sequential(
-            nn.Conv2d(512,1024,kernel_size=3, stride=1,padding=1),
+            nn.Conv2d(512,1024,kernel_size=3, stride=1,padding=1,bias=False),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3,stride=2,padding=1)
             )
         self.radar_conv5 =nn.Sequential(
-            nn.Conv2d(1024,2048,kernel_size=3, stride=1,padding=1),
+            nn.Conv2d(1024,2048,kernel_size=3, stride=1,padding=1,bias=False),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3,stride=2,padding=1)
             )
@@ -685,12 +676,12 @@ class ResNet(nn.Module):
                 radar_x =self.radar_conv2(radar_x)
                 # print('radar.shape',radar_x.shape)
                 # print(x.shape)
-                x=0.1*radar_x+0.9*x
+                x=0.2*radar_x+0.8*x
             if self.use_radar and i==1:
                 radar_x=self.radar_conv3(radar_x)
                 # print(radar_x.shape)
                 # print(x.shape)
-                x=0.1*radar_x+0.9*x
+                x=0.2*radar_x+0.8*x
             if self.use_radar and i==2:
                 radar_x=self.radar_conv4(radar_x)
                 x=0.1*radar_x+0.9*x
